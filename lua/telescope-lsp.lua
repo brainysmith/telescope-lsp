@@ -66,21 +66,6 @@ local code_lens = function(opts)
         return
     end
 
-    local displayer = entry_display.create {
-        separator = " ",
-        items = {
-            { width = widths.title },
-            { width = widths.client_name },
-        },
-    }
-
-    local function make_display(entry)
-        return displayer {
-            { entry.value.title },
-            { entry.value.client_name, "TelescopeResultsComment" },
-        }
-    end
-
     local function execute_action(action, client, client_name)
         local command = action.command
         local fn = client.commands[command.command] or vim.lsp.commands[command.command]
@@ -101,6 +86,28 @@ local code_lens = function(opts)
 
         print "Codelens command not found"
     end
+
+    if #results == 1 then
+        result = results[1]
+        execute_action(result.command, result.client, result.client_name)
+        return
+    end
+
+    local displayer = entry_display.create {
+        separator = " ",
+        items = {
+            { width = widths.title },
+            { width = widths.client_name },
+        },
+    }
+
+    local function make_display(entry)
+        return displayer {
+            { entry.value.title },
+            { entry.value.client_name, "TelescopeResultsComment" },
+        }
+    end
+
 
     pickers.new(opts, {
         prompt_title = "LSP CodeLens",
@@ -130,9 +137,7 @@ local code_lens = function(opts)
     }):find()
 end
 
-code_lens(require("telescope.themes").get_dropdown{})
+return {
+    code_lens = code_lens
+}
 
-
---return {
---    code_lens = code_lens
---}
